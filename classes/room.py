@@ -8,7 +8,7 @@ class Room:
     def __init__(self, room_id):
         
          # get the room from database
-        dbmanager.dbmanobj.c.execute('select room_id, title, desc from rooms where room_id = ?', (room_id,))
+        dbmanager.dbmanobj.c.execute('select room_id, title, desc, x, y, z from rooms where room_id = ?', (room_id,))
 
         # there's probably a better way to do this
 
@@ -17,6 +17,9 @@ class Room:
         self.room_id = row[0]
         self.title = row[1]
         self.desc = row[2]
+        self.x = row[3]
+        self.y = row[4]
+        self.z = row[5]
 
         
         dbmanager.dbmanobj.c.execute('select dir, dest_room_id from doors where src_room_id = ?', (self.room_id,))
@@ -39,4 +42,5 @@ class Room:
 
     def save(self):
         dbmanager.dbmanobj.c.execute('update rooms set title=?, desc=? where room_id=?', (self.title, self.desc, self.room_id))
+        dbmanager.dbmanobj.conn.commit()
 
