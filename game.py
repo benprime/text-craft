@@ -46,7 +46,6 @@ def draw_map():
     y_min = roomMan.current_room.y - 3
     y_max = roomMan.current_room.y + 3
 
-#    db_rows = classes.dbmanager.dbmanobj.c.execute('select x, y, z from rooms where z=? and x between ? and ? and y between ? and ? order by y desc, x', (roomMan.current_room.z, x_min, x_max, y_min, y_max))
  
     sql = 'select rooms.room_id, doors.dir, rooms.x, rooms.y from doors \
        inner join rooms on (doors.src_room_id = rooms.room_id) \
@@ -144,7 +143,17 @@ while(True):
     if action == "exit" or action == "quit":
         sys.exit(0)
     elif action == "help":
-        print "You don't need any help. ;)"
+        print "Create your own text game map v1.0"
+        print "  By Ben Smith, March 2012"
+        print
+        print "commands:"
+        print "  create room <direction> - creates a room in the specified direction."
+        print "      Valid directions: n, s, e, w, nw, sw, ne, se, u, d"
+        print "  set title <title> - sets current room title."
+        print "  set desc <desc> - sets the current room description."
+        print "  map - displays a map of your current area."
+        print "  debug - display room_id (database id) of your current room."
+        print "  quit/exit - exits the script."
 
     # movement commands
     elif action in movement_actions:
