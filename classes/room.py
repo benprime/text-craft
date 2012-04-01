@@ -28,13 +28,13 @@ class Room:
         for row in dbmanager.dbmanobj.c:
             self.exits[row[0]] = row[1]
 
-    def printDesc(self):
+    def print_desc(self):
         print '\033[1;32m' + self.title + '\033[1;m'
         print '\033[1;30m' + self.desc + '\033[1;m'
-        print 'Exits: ' + self.buildExitString()
+        print 'Exits: ' + self.build_exit_string()
 
 
-    def buildExitString(self):
+    def build_exit_string(self):
         if( len(self.exits) == 0 ):
             return "None."
 
