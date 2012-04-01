@@ -1,11 +1,10 @@
 #!/usr/bin/python -tt
 
 from classes.roommanager import RoomManager
-import classes.dbmanager
+import classes.db
 
 import sys
 import re
-
 import math
 
 roomMan = RoomManager()
@@ -54,7 +53,8 @@ def draw_map():
        and rooms.y between ? and ? \
        order by rooms.room_id, rooms.y desc, rooms.x'
 
-    db_rows = classes.dbmanager.dbmanobj.c.execute(sql, (roomMan.current_room.z, x_min, x_max, y_min, y_max))
+    c = classes.db.conn().cursor()
+    db_rows = c.execute(sql, (roomMan.current_room.z, x_min, x_max, y_min, y_max))
 
     room_data = {}
 

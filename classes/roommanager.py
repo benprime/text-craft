@@ -1,5 +1,5 @@
 from room import Room
-import dbmanager
+import db
 import sys
 
 opposite_dir = { 'north' : 'south',
@@ -22,14 +22,16 @@ class RoomManager:
 
     def create_room(self, direction):
 
+        c = db.conn().cursor()
+        
         # see if room already exists
         new_room_id = self.room_exists(direction)
        
         #if room does not exist, create it
         if new_room_id == 0:
             coords = self.get_coords_from_dir(direction)
-            dbmanager.dbmanobj.c.execute('insert into rooms (title, desc, x, y, z) values ("default title", "default desc", ?, ?, ?)', coords)
-            new_room_id = dbmanager.dbmanobj.c.lastrowid
+            c.execute('insert into rooms (title, desc, x, y, z) values ("default title", "default desc", ?, ?, ?)', coords)
+            new_room_id = c.lastrowid
         else:
             print "A room already exists at this map location, using existing room."
 
@@ -39,12 +41,12 @@ class RoomManager:
             return
 
         # create the door to the room
-        dbmanager.dbmanobj.c.execute('insert into doors (src_room_id, dest_room_id, dir) values (?,?,?)', (self.current_room.room_id, new_room_id, direction))
+        c.execute('insert into doors (src_room_id, dest_room_id, dir) values (?,?,?)', (self.current_room.room_id, new_room_id, direction))
 
         #create the door from the new room back to this one
-        dbmanager.dbmanobj.c.execute('insert into doors (src_room_id, dest_room_id, dir) values (?,?,?)', (new_room_id, self.current_room.room_id, opposite_dir[direction]))
+        c.execute('insert into doors (src_room_id, dest_room_id, dir) values (?,?,?)', (new_room_id, self.current_room.room_id, opposite_dir[direction]))
 
-        dbmanager.dbmanobj.conn.commit()
+        db.conn().commit()
 
         # refresh the current room
         self.current_room = Room(self.current_room.room_id)
@@ -63,8 +65,9 @@ class RoomManager:
     # this method is used when checking valid moves
     def door_exists(self, direction):
                 
-        dbmanager.dbmanobj.c.execute('select count(1) from doors where src_room_id = ? and dir = ?', (self.current_room.room_id, direction))
-        room_count = dbmanager.dbmanobj.c.fetchone()[0]
+        c = db.conn().cursor()        
+        c.execute('select count(1) from doors where src_room_id = ? and dir = ?', (self.current_room.room_id, direction))
+        room_count = c.fetchone()[0]
 
         if room_count != 0:
             return True
@@ -77,13 +80,14 @@ class RoomManager:
     def room_exists(self, direction):
 
         coords = self.get_coords_from_dir(direction)
+        c = db.conn().cursor()
 
-        dbmanager.dbmanobj.c.execute('select count(*) from rooms where x = ? and y = ? and z = ?', coords)
-        count = dbmanager.dbmanobj.c.fetchone()[0]
+        c.execute('select count(*) from rooms where x = ? and y = ? and z = ?', coords)
+        count = c.fetchone()[0]
 
         if count != 0:
-            dbmanager.dbmanobj.c.execute('select room_id from rooms where x = ? and y = ? and z = ?', coords)
-            room_id = dbmanager.dbmanobj.c.fetchone()[0]
+            c.execute('select room_id from rooms where x = ? and y = ? and z = ?', coords)
+            room_id = c.fetchone()[0]
             return room_id
         else:
             return 0
