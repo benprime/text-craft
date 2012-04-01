@@ -1,7 +1,7 @@
 #!/usr/bin/python -tt
 
 from classes.roommanager import RoomManager
-import classes.db
+import db
 
 import sys
 import re
@@ -38,14 +38,14 @@ def auto_complete(action_string):
 
 # Method to draw an ascii map of the current area
 def draw_map():
-    
-    # set the bounds of the map (3 square radius around current room)
-    x_min = roomMan.current_room.x - 3
-    x_max = roomMan.current_room.x + 3
-    y_min = roomMan.current_room.y - 3
-    y_max = roomMan.current_room.y + 3
 
- 
+    # set the bounds of the map (2 square radius around current room)
+    x_min = roomMan.current_room.x - 2
+    x_max = roomMan.current_room.x + 2
+    y_min = roomMan.current_room.y - 1
+    y_max = roomMan.current_room.y + 2
+
+
     sql = 'select rooms.room_id, doors.dir, rooms.x, rooms.y from doors \
        inner join rooms on (doors.src_room_id = rooms.room_id) \
        where rooms.z = ? \
@@ -53,7 +53,7 @@ def draw_map():
        and rooms.y between ? and ? \
        order by rooms.room_id, rooms.y desc, rooms.x'
 
-    c = classes.db.conn().cursor()
+    c = db.conn().cursor()
     db_rows = c.execute(sql, (roomMan.current_room.z, x_min, x_max, y_min, y_max))
 
     room_data = {}
@@ -63,13 +63,13 @@ def draw_map():
 
         # key in the form of "x,y"
         key = str(row[2]) + ',' + str(row[3])
- 
+
         if( key in room_data ):
             room_data[key].append(row[1])
         else:
             room_data[key] = [row[1]]
 
-    
+
 
     # print a title for the map
     if roomMan.current_room.z >= 0:
@@ -78,7 +78,7 @@ def draw_map():
         print "Map of basement level " + str(math.fabs(roomMan.current_room.z))
 
     for y in reversed(range(y_min, y_max)):
-        
+
         line1 = ''
         line2 = ''
         line3 = ''
@@ -91,7 +91,7 @@ def draw_map():
                 room_map = roomMan.get_room_map(room_data[key], is_current_room)
             else:
                 room_map = ('   ', '   ', '   ')
-            
+
             line1 += room_map[0]
             line2 += room_map[1]
             line3 += room_map[2]
@@ -212,7 +212,5 @@ while(True):
 
     elif action != "":
         print "I'm not sure how to do that."
-
-        
 
 
